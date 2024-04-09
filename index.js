@@ -1,5 +1,4 @@
 var express = require('express');
-var path = require('path');
 var app = express();
 
 // Define the port to run on

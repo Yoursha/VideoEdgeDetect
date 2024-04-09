@@ -1,11 +1,24 @@
 <HTML>
 <head>
+    
+</head>
+<body>
+    <video id="myvid" controls>
+        <source src="rickroll2.mp4" type="video/mp4" width="600" height="250">
+    </video>
+    <canvas id="mycanvas" width="600" height="250"></canvas>
     <script type="text/javascript">
+        let video = document.getElementById("myvid");
+        let canvas = document.getElementById("mycanvas");
+        gl = canvas.getContext("2d");
+        video.addEventListener("play",function(){
+            draw(this,gl,canvas.width,canvas.height)
+        },false)
     const sobel_v =
     [
-       -1.0, 0.0, +1.0,
-       -2.0, 0.0, +2.0,
-       -1.0, 0.0, +1.0
+    -1.0, 0.0, +1.0,
+    -2.0, 0.0, +2.0,
+    -1.0, 0.0, +1.0
     ];
 
     const sobel_h =
@@ -14,6 +27,15 @@
      0.0,  0.0,  0.0,
      +1.0, +2.0, +1.0
     ];
+    function draw(v,c,w,h)
+    {
+        if (v.paused || v.ended) return false;
+        c.drawImage(video,0,0,w,h);
+        var imgdata = c.getImageData(0,0,w,h);
+        imgdata.data = createEdgeMapFromImageData(imgdata);
+        c.putImageData(imgdata,0,0);
+        setTimeout(draw,20,v,c,w,h);
+    }
         function createEdgeMapFromImageData(imageData) {
             let pixels = new Uint8ClampedArray(imageData.data.length * 0.25);
             let width = imageData.width;
@@ -49,24 +71,17 @@
         pixels[i] = Math.sqrt(hSum * hSum + vSum * vSum);
         // pixels[i] = Math.abs((hSum + vSum) * 0.5);
     };
-
-    return pixels;
+     i = imageData.data.length;
+            while (i) {
+                // let a = data[i-1];
+                data[i-2]=pixels[i*0.25];
+                data[i-3]=pixels[i*0.25];
+                data[i-4]=pixels[i*0.25];
+                i -= 4;
+            
+            }
+    return data;
     } 
-        let video = document.getElementById("myvid");
-        let canvas = document.getElementById("mycanvas");
-        gl = canvas.getContext("2d");
-        video.addEventListener("playing",function(){
-            gl.drawImage(video,0,0,canvas.width,canvas.height)
-            var newdata = createEdgeMapFromImageData(gl.getImageData(0,0,video.width,video.height))
-            gl.putImageData(newdata,0,0)
-        })
     </script>
-</head>
-<body>
-    <video id="myvid" controls>
-        <source src="rickroll.mp4" type="video/mp4" width="600" height="250">
-    </video>
-    <canvas id="mycanvas" width="600" height="250"></canvas>
-
 </body>
 </HTML>
