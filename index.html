@@ -1,0 +1,87 @@
+<HTML>
+<head>
+    
+</head>
+<body>
+    <video id="myvid" controls>
+        <source src="rickroll2.mp4" type="video/mp4" width="600" height="250">
+    </video>
+    <canvas id="mycanvas" width="600" height="250"></canvas>
+    <script type="text/javascript">
+        let video = document.getElementById("myvid");
+        let canvas = document.getElementById("mycanvas");
+        gl = canvas.getContext("2d");
+        video.addEventListener("play",function(){
+            draw(this,gl,canvas.width,canvas.height)
+        },false)
+    const sobel_v =
+    [
+    -1.0, 0.0, +1.0,
+    -2.0, 0.0, +2.0,
+    -1.0, 0.0, +1.0
+    ];
+
+    const sobel_h =
+    [
+     -1.0, -2.0, -1.0,
+     0.0,  0.0,  0.0,
+     +1.0, +2.0, +1.0
+    ];
+    function draw(v,c,w,h)
+    {
+        if (v.paused || v.ended) return false;
+        c.drawImage(video,0,0,w,h);
+        var imgdata = c.getImageData(0,0,w,h);
+        imgdata.data = createEdgeMapFromImageData(imgdata);
+        c.putImageData(imgdata,0,0);
+        setTimeout(draw,20,v,c,w,h);
+    }
+        function createEdgeMapFromImageData(imageData) {
+            let pixels = new Uint8ClampedArray(imageData.data.length * 0.25);
+            let width = imageData.width;
+            let data = imageData.data;
+
+            // create greyscale first
+            
+            let i = imageData.data.length;
+            while (i) {
+                // let a = data[i-1];
+                let b = data[i-2];
+                let g = data[i-3];
+                let r = data[i-4];
+                pixels[i*0.25] = 0.3*r + 0.59*g + 0.11*b; // Luminocity weighted average.
+                // pixels[i*0.25] = (r+b+g)/3; // average
+                 i -= 4;
+            
+            }
+
+        // now edge detect
+        for (let i = 0; i < pixels.length; i++) {
+        // loop our 3x3 kernels, build our kernel values
+        let hSum = 0;
+        let vSum = 0;
+        for (let y = 0; y < 3; y++)
+            for (let x = 0; x < 3; x++) {
+                let pixel = pixels[i + (width * y) + x];
+                let kernelAccessor = (x) * 3 + (y);
+                hSum += pixel * sobel_h[kernelAccessor];
+                vSum += pixel * sobel_v[kernelAccessor];
+            }
+        // apply kernel evaluation to current pixel
+        pixels[i] = Math.sqrt(hSum * hSum + vSum * vSum);
+        // pixels[i] = Math.abs((hSum + vSum) * 0.5);
+    };
+     i = imageData.data.length;
+            while (i) {
+                // let a = data[i-1];
+                data[i-2]=pixels[i*0.25];
+                data[i-3]=pixels[i*0.25];
+                data[i-4]=pixels[i*0.25];
+                i -= 4;
+            
+            }
+    return data;
+    } 
+    </script>
+</body>
+</HTML>
